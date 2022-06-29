@@ -47,7 +47,7 @@ void setup()
     // External inturrupt and timer
     cli();
 
-    // Activar interrupcion interna del timer y interrupcioin externa por el pin 5 en el flanco de bajada.
+    // Activar interrupcion interna del timer y interrupcioin externa por el pin 3(INT5) en el flanco de bajada.
     EICRB |= (1 << ISC51);
     EIMSK |= (1 << INT5);
 
@@ -62,6 +62,7 @@ void setup()
     // T = 1s
 
     OCR3A = 31249; // 16MHz/(2*256*1/(1s)) - 1
+    pinMode(5, OUTPUT); // Para poder visualizar y comporbar con el osciloscopio se activa la linea del pin 5
     TCCR3A = B01000000;
     TCCR3B = B00001100;
 
