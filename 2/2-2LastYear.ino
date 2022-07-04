@@ -333,8 +333,10 @@ void setup()
     Serial.println("2:  Leer una posición (de 0 a 8191) del 24LC64");
     Serial.println("3:  Inicializar toda la memoria del 24LC64 a un valor");
     Serial.println("4:  Mostrar el contenido de un bloque de 256 bytes del 24LC64, comenzando en una dirección especificada");
-    Serial.println("5:   Inicializar usando Page Write toda la memoria del 24LC64 a un valor");
-    Serial.println("6:   Mostrar el contenido de un bloque de 256 bytes del 24LC64 (Sequential Read), comenzando en una dirección especificada");
+    Serial.println("5:  Inicializar usando Page Write toda la memoria del 24LC64 a un valor");
+    Serial.println("6:  Mostrar el contenido de un bloque de 256 bytes del 24LC64 (Sequential Read), comenzando en una dirección especificada");
+    Serial.println("7:  Mostrar la fecha y hora tomado del RTC");
+    Serial.println("8:  Mostrarla temperatura leida del RTC");
     Serial.println("Despues de introducir cada valor pulsa enter");
     Serial.println("Input Operation number: ");
 }
@@ -379,8 +381,8 @@ void menu()
                 Serial.println("");
                 switch (cSelected)
                 {
-                case:
-                    /* code */
+                case 8:
+
                     break;
 
                 default:
@@ -391,7 +393,8 @@ void menu()
             }
             else if (operationPos == 1)
             {
-                Serial.println("");
+                Serial.println("first");
+                Serial.println(cSelected);
                 switch (cSelected)
                 {
                 case 1:
@@ -443,6 +446,7 @@ void menu()
             }
             else if (operationPos == 2)
             {
+                Serial.println("");
                 switch (cSelected)
                 {
                 case 1:
@@ -454,9 +458,9 @@ void menu()
                     break;
                 }
             }
+            wordReading = 0;
+            isReadingWord = true;
         }
-        wordReading = 0;
-        isReadingWord = true;
     }
 }
 
