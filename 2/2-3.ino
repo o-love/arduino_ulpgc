@@ -383,6 +383,32 @@ start6:
     return date;
 }
 
+float retrieveTemp()
+{
+start:
+    control(DS323_ADDRESS, 0); // Inicializamos una operacion de escritura para poder setear el registro de direcciones de la memoria
+    if (R_bit() != 0)
+        goto start;
+
+    i2c_write_byte(0x11); // Escribimos el byte menos significativo de la direccion del dato
+
+    if (R_bit() != 0)
+        goto start;
+
+    control(DS323_ADDRESS, 1); // Sin ninguna instruccion stop inicializamos la operacion de lectura
+    if (R_bit() != 0)
+        goto start;
+
+    float toReturn = i2c_read_byte();
+    E_bit0();
+
+    toReturn += 0.25 * ((float)(i2c_read_byte() >> 6));
+    E_bit1();
+
+    stop();
+    return toReturn;
+}
+
 void printDateTimeSerial()
 {
     // Retrive all necesary data
@@ -488,6 +514,8 @@ void menu()
                     break;
                 case 8:
 
+                    Serial.print("La temperatura es: ");
+                    Serial.println(retrieveTemp());
                     break;
 
                 default:
