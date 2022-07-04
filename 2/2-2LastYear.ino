@@ -340,8 +340,7 @@ void setup()
 }
 int cSelected = 0;
 bool isReadingWord = true;
-bool isOperating = false;
-bool isFirst = true;
+int operationPos = 0;
 int wordReading = 0;
 int firstOption = 0;
 
@@ -372,90 +371,92 @@ void menu()
         }
         else
         {
-            if (!isOperating)
+            if (operationPos == 0)
             { // Intial setup for reading
                 firstOption = 0;
-                isOperating = true;
                 isReadingWord = true;
-                isFirst = true;
                 cSelected = wordReading;
                 Serial.println("");
-                Serial.println("Enter first data piece according to type of operation:");
+                switch (cSelected)
+                {
+                case:
+                    /* code */
+                    break;
+
+                default:
+                    Serial.println("Enter first data piece according to type of operation:");
+                    operationPos++; // Pasamos a la siguiente paso de la operacion selecionado
+                    break;
+                }
             }
-            else
+            else if (operationPos == 1)
             {
-                // Serial.println("checking operation");
-                // Serial.println(cSelected);
-                // Serial.println(wordReading);
-                if (isFirst)
-                { // If first word is done reading
-                    Serial.println("");
-                    switch (cSelected)
-                    {
-                    case 1:
-                        firstOption = wordReading;
-                        Serial.println("Type in data now:");
-                        isFirst = false;
-                        break;
-                    case 2:
-                        Serial.print("0x");
-                        Serial.println(byteReadFromMem(B1010000, wordReading), HEX);
-                        isOperating = false;
-                        Serial.println("Done printing individual word.");
-                        break;
-                    case 3:
-                        timei = millis();
-                        setEntireMemTo(B1010000, wordReading);
-                        Serial.print("Done setting memory using individual writes. Total time ");
-                        Serial.print(millis() - timei);
-                        Serial.println("ms");
-                        isOperating = false;
-                        break;
-                    case 4:
-                        timei = millis();
-                        printBlockRead(B1010000, wordReading);
-                        Serial.print("Done reading block using individual reads. Total time ");
-                        Serial.print(millis() - timei);
-                        Serial.println("ms");
-                        isOperating = false;
-                        break;
-                    case 5:
-                        timei = millis();
-                        setEntireMemToPageWrite(B1010000, wordReading);
-                        Serial.print("Done setting memory using page writes. Total time ");
-                        Serial.print(millis() - timei);
-                        Serial.println("ms");
-                        isOperating = false;
-                        break;
-                    case 6:
-                        timei = millis();
-                        printBlockPageRead(B1010000, wordReading);
-                        Serial.print("Done reading memory using sequencal read. Total time ");
-                        Serial.print(millis() - timei);
-                        Serial.println("ms");
-                        isOperating = false;
-                        break;
-                    default:
-                        break;
-                    }
-                }
-                else
-                { // if second word is done reading
-                    switch (cSelected)
-                    {
-                    case 1:
-                        byteWriteToMem(B1010000, firstOption, wordReading);
-                        Serial.println("Done writing word to memory");
-                        isOperating = false;
-                        break;
-                    default:
-                        break;
-                    }
+                Serial.println("");
+                switch (cSelected)
+                {
+                case 1:
+                    firstOption = wordReading;
+                    Serial.println("Type in data now:");
+                    operationPos++; // Pasamos al siguiente paso de esta operacion
+                    break;
+                case 2:
+                    Serial.print("0x");
+                    Serial.println(byteReadFromMem(B1010000, wordReading), HEX);
+                    operationPos = 0; // Terminamos con la operacion
+                    Serial.println("Done printing individual word.");
+                    break;
+                case 3:
+                    timei = millis();
+                    setEntireMemTo(B1010000, wordReading);
+                    Serial.print("Done setting memory using individual writes. Total time ");
+                    Serial.print(millis() - timei);
+                    Serial.println("ms");
+                    operationPos = 0; // Terminamos con la operacion
+                    break;
+                case 4:
+                    timei = millis();
+                    printBlockRead(B1010000, wordReading);
+                    Serial.print("Done reading block using individual reads. Total time ");
+                    Serial.print(millis() - timei);
+                    Serial.println("ms");
+                    operationPos = 0; // Terminamos con la operacion
+                    break;
+                case 5:
+                    timei = millis();
+                    setEntireMemToPageWrite(B1010000, wordReading);
+                    Serial.print("Done setting memory using page writes. Total time ");
+                    Serial.print(millis() - timei);
+                    Serial.println("ms");
+                    operationPos = 0; // Terminamos con la operacion
+                    break;
+                case 6:
+                    timei = millis();
+                    printBlockPageRead(B1010000, wordReading);
+                    Serial.print("Done reading memory using sequencal read. Total time ");
+                    Serial.print(millis() - timei);
+                    Serial.println("ms");
+                    operationPos = 0; // Terminamos con la operacion
+                    break;
+                default:
+                    break;
                 }
             }
-            wordReading = 0;
-            isReadingWord = true;
+            else if (operationPos == 2)
+            {
+                switch (cSelected)
+                {
+                case 1:
+                    byteWriteToMem(B1010000, firstOption, wordReading);
+                    Serial.println("Done writing word to memory");
+                    operationPos = 0; // Terminamos con la operacion
+                    break;
+                default:
+                    break;
+                }
+            }
         }
+        wordReading = 0;
+        isReadingWord = true;
     }
 }
 
