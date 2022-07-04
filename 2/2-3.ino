@@ -313,6 +313,99 @@ start5:
     stop();
 }
 
+struct date_time
+{
+    int second;
+    int minute;
+    int hour;
+    int day;
+    int date;
+    int month;
+    int year;
+};
+
+#define DS323_ADDRESS B1101000
+struct date_time retriveDateTime()
+{
+    // TODO: setup time to get hour in 24 hour format
+    struct date_time date;
+start6:
+    control(DS323_ADDRESS, 0); // Inicializamos una operacion de escritura para poder setear el registro de direcciones de la memoria
+    if (R_bit() != 0)
+        goto start6;
+
+    i2c_write_byte(0); // Escribimos el byte menos significativo de la direccion del dato
+
+    if (R_bit() != 0)
+        goto start6;
+
+    control(DS323_ADDRESS, 1); // Sin ninguna instruccion stop inicializamos la operacion de lectura
+    if (R_bit() != 0)
+        goto start6;
+
+    // Empezamos lectura
+    int temp;
+
+    temp = i2c_read_byte();
+    date.second = temp & 0xF;
+    date.second += ((temp & 0x70) >> 4) * 10;
+    E_bit0();
+
+    temp = i2c_read_byte();
+    date.minute = temp & 0xF;
+    date.minute += ((temp & 0x70) >> 4) * 10;
+    E_bit0();
+
+    temp = i2c_read_byte();
+    date.hour = temp & 0xF;
+    date.hour += ((temp & 0x30) >> 4) * 10;
+    E_bit0();
+
+    date.day = i2c_read_byte() & 0x7;
+    E_bit0();
+
+    temp = i2c_read_byte();
+    date.date = temp & 0xF;
+    date.date += ((temp & 0x30) >> 4) * 10;
+    E_bit0();
+
+    temp = i2c_read_byte();
+    date.month = temp & 0xF;
+    date.month += ((temp & 0x10) >> 4) * 10;
+    E_bit0();
+
+    temp = i2c_read_byte();
+    date.year = temp & 0xF;
+    date.year += ((temp & 0xF0) >> 4) * 10;
+    E_bit1();
+
+    stop();
+    return date;
+}
+
+void printDateTimeSerial()
+{
+    // Retrive all necesary data
+
+    struct date_time Date = retriveDateTime();
+
+    // Display data
+
+    Serial.print("Fecha: dia ");
+    Serial.print(Date.date);
+    Serial.print("; del mes ");
+    Serial.print(Date.month);
+    Serial.print("; del año ");
+    Serial.println(Date.year);
+
+    Serial.print("Hora: ");
+    Serial.print(Date.hour);
+    Serial.print("; minuto: ");
+    Serial.print(Date.minute);
+    Serial.print("; segundo: ");
+    Serial.println(Date.second);
+}
+
 void setup()
 {
 
@@ -388,6 +481,15 @@ void menu()
                 Serial.println("");
                 switch (cSelected)
                 {
+                case 7:
+
+                    printDateTimeSerial();
+
+                    break;
+                case 8:
+
+                    break;
+
                 default:
                     Serial.println("Enter first data piece according to type of operation:");
                     operationPos++; // Pasamos a la siguiente paso de la operacion selecionado

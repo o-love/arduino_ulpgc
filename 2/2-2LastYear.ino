@@ -386,13 +386,8 @@ void menu()
                 isReadingWord = true;
                 cSelected = wordReading;
                 Serial.println("");
-                switch (cSelected)
-                {
-                default:
-                    Serial.println("Enter first data piece according to type of operation:");
-                    operationPos++; // Pasamos a la siguiente paso de la operacion selecionado
-                    break;
-                }
+                Serial.println("Enter first data piece according to type of operation:");
+                operationPos++; // Pasamos a la siguiente paso de la operacion selecionado
             }
             else if (operationPos == 1)
             {
