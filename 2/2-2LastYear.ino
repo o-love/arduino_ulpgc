@@ -368,8 +368,10 @@ void menu()
         }
         else if (!(incommingByte >= '0' && incommingByte <= '9'))
         {
+            Serial.println(incommingByte);
             Serial.println("Introduce un numero, empieza de nuevo.");
             wordReading = 0;
+            return;
         }
 
         if (isReadingWord)
@@ -386,6 +388,11 @@ void menu()
                 Serial.println("");
                 switch (cSelected)
                 {
+                case 7:
+                    // Retrive all necesary data
+
+                    // Display data
+                    break;
                 case 8:
 
                     break;
@@ -446,6 +453,8 @@ void menu()
                     operationPos = 0; // Terminamos con la operacion
                     break;
                 default:
+                    Serial.println("Unkown command. Please ensure the command you introduced is valid.");
+                    operationPos = 0;
                     break;
                 }
             }
@@ -460,6 +469,8 @@ void menu()
                     operationPos = 0; // Terminamos con la operacion
                     break;
                 default:
+                    Serial.println("Unkown command. Please ensure the command you introduced is valid.");
+                    operationPos = 0;
                     break;
                 }
             }
