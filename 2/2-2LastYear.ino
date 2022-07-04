@@ -7,7 +7,7 @@
 #define ESC_SCL 4  // puerto de salida para escribir el valor de la línea SCL-out
 #define ESC_SDA 39 // puerto de salida para escribir el valor de la línea SDA-out
 
-int waitTime = 0; // Utilizdo para poder visualizar en el osciloscopio.
+// int waitTime = 0; // Utilizdo para poder visualizar en el osciloscopio.
 
 void start()
 {
@@ -15,11 +15,11 @@ void start()
     digitalWrite(ESC_SCL, HIGH);
     digitalWrite(ESC_SDA, HIGH); // Soltamos los datos y el reloj, como nadie mas lo esta controlando pasa a estar altos en el bus tambien
 
-    delay(waitTime);
+    // delay(waitTime);
 
     digitalWrite(ESC_SDA, LOW); // Bajamos la linea de datos mientras que el reloj sigue en modo lectura
 
-    delay(waitTime);
+    // delay(waitTime);
 
     digitalWrite(ESC_SCL, LOW); // Bajamos el reloj para prepararnos para el siguente instruccion.
 }
@@ -30,15 +30,15 @@ void stop()
     digitalWrite(ESC_SCL, LOW);
     digitalWrite(ESC_SDA, LOW); // Bajamos la lina de datos y el reloj tomando control del BUS para preparar el señal stop
 
-    delay(waitTime);
+    // delay(waitTime);
 
     digitalWrite(ESC_SCL, HIGH); // Subimos el reloj a modo lectura para prepararnos para el señal stop
 
-    delay(waitTime / 2);
+    // delay(waitTime / 2);
 
     digitalWrite(ESC_SDA, HIGH); // Realizamos un flanco de subida mientras en modo lectura indicando el stop
 
-    delay(waitTime);
+    // delay(waitTime);
 }
 
 void E_bit1()
@@ -46,15 +46,15 @@ void E_bit1()
     // Serial.println("Ebit1\n");
     digitalWrite(ESC_SCL, LOW); // Bajamos el reloj tomando asi control del BUS para escribir en el
 
-    delay(waitTime / 2);
+    // delay(waitTime / 2);
 
     digitalWrite(ESC_SDA, HIGH); // Escribimos nuestro dato en el bus.
 
-    delay(waitTime / 2);
+    // delay(waitTime / 2);
 
     digitalWrite(ESC_SCL, HIGH); // Ponemos el bus en modo de lectura
 
-    delay(waitTime);
+    // delay(waitTime);
 
     digitalWrite(ESC_SCL, LOW);
     digitalWrite(ESC_SDA, LOW); // Preparamos el bus para el siguiente instruccion.
@@ -65,15 +65,15 @@ void E_bit0()
     // Serial.println("Ebit0\n");
     digitalWrite(ESC_SCL, LOW); // Bajamos el reloj popniendo el BUS en modo escritura.
 
-    delay(waitTime / 2);
+    // delay(waitTime / 2);
 
     digitalWrite(ESC_SDA, LOW); // Escribimos el dato en el BUS.
 
-    delay(waitTime / 2);
+    // delay(waitTime / 2);
 
     digitalWrite(ESC_SCL, HIGH); // Metemos el BUS en modo lectura
 
-    delay(waitTime);
+    // delay(waitTime);
 
     digitalWrite(ESC_SCL, LOW); // Preparamos el bus para la siguiente insturccion.
     digitalWrite(ESC_SDA, LOW);
@@ -84,16 +84,16 @@ byte R_bit()
     // Serial.println("Rbit\n");
     digitalWrite(ESC_SCL, LOW); // Nos aseguramos de que se estemos en modo escritura
 
-    delay(waitTime / 2);
+    // delay(waitTime / 2);
 
     digitalWrite(ESC_SDA, HIGH); // Soltamos el control de la linea de datos
 
-    delay(waitTime / 2);
+    // delay(waitTime / 2);
 
     digitalWrite(ESC_SCL, HIGH);    // Nos ponemos en modo lectura
     int val = digitalRead(LEE_SDA); // Leemos el valor de la linea de datos
 
-    delay(waitTime);
+    // delay(waitTime);
 
     digitalWrite(ESC_SCL, LOW);
     digitalWrite(ESC_SDA, LOW); // Preparamos el bus para la siguiente instruccion
@@ -405,8 +405,7 @@ void menu()
             }
             else if (operationPos == 1)
             {
-                Serial.println("first");
-                Serial.println(cSelected);
+                Serial.println("");
                 switch (cSelected)
                 {
                 case 1:
