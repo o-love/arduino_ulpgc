@@ -366,6 +366,11 @@ void menu()
         {
             isReadingWord = false;
         }
+        else if (!(incommingByte >= '0' && incommingByte <= '9'))
+        {
+            Serial.println("Introduce un numero, empieza de nuevo.");
+            wordReading = 0;
+        }
 
         if (isReadingWord)
         {
