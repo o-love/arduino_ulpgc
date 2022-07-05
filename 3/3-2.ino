@@ -489,7 +489,18 @@ void setup()
 
     // Initializar Timer 1 para interrumpir cada 10 ms
 
-        // inicializar LCD
+    TCCR1A = 0;
+    TCCR1B = 0;
+    TCNT1 = 0;
+
+    OCR1A = 9999; // 16MHz/(2*8*1/(10ms)) - 1
+    TCCR1A = B00000000;
+    TCCR1B = B00001010;
+
+    // Habilitamos interrupciones para el timer con OCIE1A
+    TIMSK1 = B00000010;
+
+    // inicializar LCD
     Serial3.write(0xFE);
     Serial3.write(0);
     delay(100);
