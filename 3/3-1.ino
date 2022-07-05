@@ -322,6 +322,10 @@ struct date_time
     int date;
     int month;
     int year;
+    int alarm1Hour;
+    int alarm1Minute;
+    int alarm2Hour;
+    int alarm2Minute;
 };
 
 #define DS323_ADDRESS B1101000
@@ -441,6 +445,11 @@ void setup()
     // Habilitamos interrupciones para el timer con OCIE3A
     TIMSK3 = B00000010;
 
+    // inicializar LCD
+    Serial3.write(0xFE);
+    Serial3.write(0);
+    delay(100);
+
     sei();
 }
 
@@ -448,7 +457,99 @@ void loop()
 {
 }
 
+const char *months[] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
+
 ISR(TIMER3_COMPA_vect) // Update LCD
 {
-    float currentTemp =
+    float currentTemp = retrieveTemp();
+    struct date_time Date = retriveDateTime();
+
+    char buffer[40];
+
+    // Print hour
+    Serial3.write(0xFE);
+    Serial3.write(128 + 5);
+
+    sprintf(buffer, "%02d:%02d:%02d", Date.hour, Date.minute, Date.second);
+    Serial3.write(buffer);
+
+    // Print tempeture static
+    Serial3.write(0xFE);
+    Serial3.write(128 + 15);
+
+    Serial3.write("T=");
+
+    // Print tempeture
+    Serial3.write(0xFE);
+    Serial3.write(128 + 17);
+
+    sprintf(buffer, "%02d", currentTemp);
+    Serial3.write(buffer);
+
+    // Print tempeture static
+    Serial3.write(0xFE);
+    Serial3.write(128 + 19);
+
+    Serial3.write("C");
+
+    // Print Alarm Static
+    Serial3.write(0xFE);
+    Serial3.write(192 + 0);
+
+    Serial3.write("ALARM");
+
+    // Print Alarm1 time
+    Serial3.write(0xFE);
+    Serial3.write(148 + 0);
+
+    sprintf(buffer, "%02d:%02d", Date.alarm1Hour, Date.alarm1Minute);
+    Serial3.write(buffer);
+
+    // Print alarm active or not
+    Serial3.write(0xFE);
+    Serial3.write(148 + 5);
+    bool Alarm1active;
+
+    if (Alarm1active)
+    {
+        Serial3.write("*");
+    }
+    else
+    {
+        Serial3.write(" ");
+    }
+
+    // Print date static
+    Serial3.write(0xFE);
+    Serial3.write(148 + 13);
+
+    Serial.write("DDMMMYY");
+
+    // Print Alarm2 time
+    Serial3.write(0xFE);
+    Serial3.write(212 + 0);
+
+    sprintf(buffer, "%02d:%02d", Date.alarm2Hour, Date.alarm2Minute);
+    Serial3.write(buffer);
+
+    // Print alarm active or not
+    Serial3.write(0xFE);
+    Serial3.write(212 + 5);
+    bool Alarm2active;
+
+    if (Alarm2active)
+    {
+        Serial3.write("*");
+    }
+    else
+    {
+        Serial3.write(" ");
+    }
+
+    // Print Date
+    Serial3.write(0xFE);
+    Serial3.write(212 + 13);
+
+    sprintf(buffer, "%02d%s%02d", Date.date, months[Date.month], Date.year);
+    Serial3.write(buffer);
 }
