@@ -505,8 +505,11 @@ const char *months[] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", 
 
 ISR(TIMER3_COMPA_vect) // Update LCD
 {
-    float currentTemp = retrieveTemp();
+    // Retrive data
+    int currentTemp = (int)retrieveTemp();
     struct date_time Date = retriveDateTime();
+
+    // Print data
 
     char buffer[40];
 
@@ -552,7 +555,7 @@ ISR(TIMER3_COMPA_vect) // Update LCD
     // Print alarm active or not
     Serial3.write(0xFE);
     Serial3.write(148 + 5);
-    bool Alarm1active;
+    bool Alarm1active = true;
 
     if (Alarm1active)
     {
@@ -567,7 +570,7 @@ ISR(TIMER3_COMPA_vect) // Update LCD
     Serial3.write(0xFE);
     Serial3.write(148 + 13);
 
-    Serial.write("DDMMMYY");
+    Serial3.write("DDMMMYY");
 
     // Print Alarm2 time
     Serial3.write(0xFE);
@@ -579,7 +582,7 @@ ISR(TIMER3_COMPA_vect) // Update LCD
     // Print alarm active or not
     Serial3.write(0xFE);
     Serial3.write(212 + 5);
-    bool Alarm2active;
+    bool Alarm2active = true;
 
     if (Alarm2active)
     {
@@ -594,6 +597,6 @@ ISR(TIMER3_COMPA_vect) // Update LCD
     Serial3.write(0xFE);
     Serial3.write(212 + 13);
 
-    sprintf(buffer, "%02d%s%02d", Date.date, months[Date.month], Date.year);
+    sprintf(buffer, "%02d%s%02d", Date.date, months[Date.month - 1], Date.year);
     Serial3.write(buffer);
 }
