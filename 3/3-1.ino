@@ -414,6 +414,7 @@ void setup()
 
     // Inicialización del canal serie para comunicarse con el usuario
     Serial.begin(9600);
+    Serial3.begin(9600);
 
     // Inicialización de los terminales de entrada
     pinMode(LEE_SDA, INPUT);
@@ -424,6 +425,23 @@ void setup()
     // Asegurarse de no intervenir el bus poniendo SDA y SCL a "1"....
     digitalWrite(ESC_SDA, HIGH);
     digitalWrite(ESC_SCL, HIGH);
+
+    // Initializar Timer 3 para interrumpir cada segundo.
+
+    cli();
+    // Queremos initializar el Timer 3 a modo CTC de tal forma que genere una interrupcion cada segundo.
+    TCCR3A = 0;
+    TCCR3B = 0;
+    TCNT3 = 0;
+
+    OCR3A = 31249; // 16MHz/(2*256*1/(1s)) - 1
+    TCCR3A = B00000000;
+    TCCR3B = B00001100;
+
+    // Habilitamos interrupciones para el timer con OCIE3A
+    TIMSK3 = B00000010;
+
+    sei();
 }
 
 void loop()
