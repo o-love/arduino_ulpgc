@@ -431,6 +431,26 @@ start6:
     return date;
 }
 
+void write_seconds(byte toWrite) {}
+
+void write_minutes(byte toWrite) {}
+
+void write_hours(byte toWrite) {}
+
+void write_date(byte toWrite) {}
+
+void write_month(byte toWrite) {}
+
+void write_year(byte toWrite) {}
+
+void write_minutes_alarm1(byte toWrite) {}
+
+void write_hours_alarm1(byte toWrite) {}
+
+void write_minutes_alarm2(byte toWrite) {}
+
+void write_hours_alarm2(byte toWrite) {}
+
 float retrieveTemp()
 {
 start:
@@ -508,7 +528,7 @@ void setup()
     sei();
 }
 
-void menu()
+void menu(char c)
 {
 }
 
