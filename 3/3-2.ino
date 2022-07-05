@@ -474,8 +474,6 @@ void setup()
     digitalWrite(ESC_SDA, HIGH);
     digitalWrite(ESC_SCL, HIGH);
 
-    // Initializar Timer 3 para interrumpir cada segundo.
-
     cli();
     // Queremos initializar el Timer 3 a modo CTC de tal forma que genere una interrupcion cada segundo.
     TCCR3A = 0;
@@ -489,12 +487,57 @@ void setup()
     // Habilitamos interrupciones para el timer con OCIE3A
     TIMSK3 = B00000010;
 
-    // inicializar LCD
+    // Initializar Timer 1 para interrumpir cada 10 ms
+
+        // inicializar LCD
     Serial3.write(0xFE);
     Serial3.write(0);
     delay(100);
 
     sei();
+}
+
+bool configuration_mode = false;
+
+int operationPos = 0;
+int option_mag10 = 0;
+int option_mag1 = 0;
+void menu(char c)
+{
+    if (operationPos == 0) // Entrada en modo configuracion
+    {
+        static int preOp = 0;
+        if (preOp == 0)
+        {
+            if (c == '*')
+                preOp++;
+        }
+        else
+        {
+            if (c == '#') // Entering configuration mode
+            {
+                preOp = 0;
+                operationPos++;
+                configuration_mode = true;
+                // TODO: Display configuration options on virtual
+            }
+            else
+            {
+                preOp = 0;
+            }
+        }
+    }
+    else if (operationPos == 1) // dentro de modo configuracion. primer nivel
+    {
+    }
+}
+
+ISR(TIMER1_COMPA_vect)
+{
+    if (Serial.available())
+    {
+        menu(Serial.read());
+    }
 }
 
 void loop()
