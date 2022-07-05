@@ -350,39 +350,83 @@ start6:
     // Empezamos lectura
     int temp;
 
+    // second
     temp = i2c_read_byte();
     date.second = temp & 0xF;
     date.second += ((temp & 0x70) >> 4) * 10;
     E_bit0();
 
+    // minute
     temp = i2c_read_byte();
     date.minute = temp & 0xF;
     date.minute += ((temp & 0x70) >> 4) * 10;
     E_bit0();
 
+    // hour
     temp = i2c_read_byte();
     date.hour = temp & 0xF;
     date.hour += ((temp & 0x30) >> 4) * 10;
     E_bit0();
 
+    // day
     date.day = i2c_read_byte() & 0x7;
     E_bit0();
 
+    // date
     temp = i2c_read_byte();
     date.date = temp & 0xF;
     date.date += ((temp & 0x30) >> 4) * 10;
     E_bit0();
 
+    // month
     temp = i2c_read_byte();
     date.month = temp & 0xF;
     date.month += ((temp & 0x10) >> 4) * 10;
     E_bit0();
 
+    // year
     temp = i2c_read_byte();
     date.year = temp & 0xF;
     date.year += ((temp & 0xF0) >> 4) * 10;
+    E_bit0();
+
+    // Alarm1 second
+    i2c_read_byte();
+    E_bit0();
+
+    // Alarm1 minute
+    temp = i2c_read_byte();
+    date.alarm1Minute = temp & 0xF;
+    date.alarm1Minute += ((temp & 0x70) >> 4) * 10;
+    E_bit0();
+
+    // Alarm1 hour
+    temp = i2c_read_byte();
+    date.alarm1Hour = temp & 0xF;
+    date.alarm1Hour += ((temp & 0x30) >> 4) * 10;
+    E_bit0();
+
+    // Alarm 1 day
+    i2c_read_byte();
+    E_bit0();
+
+    // Alarm2 second
+    i2c_read_byte();
+    E_bit0();
+
+    // Alarm2 minute
+    temp = i2c_read_byte();
+    date.alarm2Minute = temp & 0xF;
+    date.alarm2Minute += ((temp & 0x70) >> 4) * 10;
+    E_bit0();
+
+    // Alarm1 hour
+    temp = i2c_read_byte();
+    date.alarm2Hour = temp & 0xF;
+    date.alarm2Hour += ((temp & 0x30) >> 4) * 10;
     E_bit1();
 
+    // end
     stop();
     return date;
 }
