@@ -1348,17 +1348,15 @@ start1:
 
     // Make noise based on alarm and print which alarm went off
 
-    if (data & 0x1 != 0)
+    if ((data & 0x1) != 0)
     {
         Serial.println("Ha sonado la alarma 1");
         tone(37, 3000, 5000);
     }
 
-    if (data & 0x2 != 0)
+    if ((data & 0x2) != 0)
     {
         Serial.println("Ha sonado la alarma 2");
         tone(37, 2000, 5000);
     }
-
-    Serial.println("ALARM!!!!!");
 }
