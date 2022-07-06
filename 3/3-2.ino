@@ -485,6 +485,45 @@ start:
     stop();
 }
 
+struct alarm_status
+{
+    bool alarm1Active;
+    bool alarm2Active;
+};
+
+struct alarm_status retrieveAlarmStatus()
+{
+start:
+    control(DS323_ADDRESS, 0); // Inicializamos una operacion de escritura para poder setear el registro de direcciones de la memoria
+    if (R_bit() != 0)
+        goto start;
+
+    i2c_write_byte(0x0E); // Escribimos el byte de la direccion del dato
+
+    if (R_bit() != 0)
+        goto start;
+
+    control(DS323_ADDRESS, 1); // Sin ninguna instruccion stop inicializamos la operacion de lectura
+    if (R_bit() != 0)
+        goto start;
+
+    byte data = i2c_read_byte();
+
+    E_bit1;
+
+    stop();
+
+    struct alarm_status toReturn;
+    toReturn.alarm1Active = (data & 0x01) != 0;
+    toReturn.alarm2Active = (data & 0x02) != 0;
+
+    return toReturn;
+}
+
+void setAlarmStatus(struct alarm_status alarmSatus)
+{
+}
+
 float retrieveTemp()
 {
 start:
@@ -826,6 +865,7 @@ ISR(TIMER3_COMPA_vect) // Update LCD
     // Retrive data
     int currentTemp = (int)retrieveTemp();
     struct date_time Date = retriveDateTime();
+    struct alarm_status alarmStatus = retrieveAlarmStatus();
 
     // Print data
 
@@ -873,9 +913,8 @@ ISR(TIMER3_COMPA_vect) // Update LCD
     // Print alarm active or not
     Serial3.write(0xFE);
     Serial3.write(148 + 5);
-    bool Alarm1active = true;
 
-    if (Alarm1active)
+    if (alarmStatus.alarm1Active)
     {
         Serial3.write("*");
     }
@@ -900,9 +939,8 @@ ISR(TIMER3_COMPA_vect) // Update LCD
     // Print alarm active or not
     Serial3.write(0xFE);
     Serial3.write(212 + 5);
-    bool Alarm2active = true;
 
-    if (Alarm2active)
+    if (alarmStatus.alarm2Active)
     {
         Serial3.write("*");
     }
