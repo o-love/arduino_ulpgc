@@ -545,6 +545,7 @@ start2:
     // Modify the registers
 
     data = data & 0xFC;
+    data |= 0x4;
 
     if (alarmSatus.alarm1Active)
     {
@@ -554,7 +555,6 @@ start2:
     {
         data |= 0x2;
     }
-
     // Store the registers
 start3:
     control(DS323_ADDRESS, 0); // Inicializamos una operacion de escritura para poder setear el registro de direcciones de la memoria
@@ -724,6 +724,9 @@ void setup()
     Serial.begin(9600);
     Serial3.begin(9600);
 
+    // Activar entrada de INT0
+    pinMode(21, INPUT);
+
     // Inicialización de los terminales de entrada
     pinMode(LEE_SDA, INPUT);
     pinMode(LEE_SCL, INPUT);
@@ -740,7 +743,7 @@ void setup()
     TCCR3B = 0;
     TCNT3 = 0;
 
-    OCR3A = 31249; // 16MHz/(2*256*1/(1s)) - 1
+    OCR3A = 62499; // 16MHz/(256*1/(1s)) - 1
     TCCR3A = B00000000;
     TCCR3B = B00001100;
 
@@ -761,8 +764,8 @@ void setup()
     TIMSK1 = B00000010;
 
     // Habilitar interrupciones externa
-    EIMSK |= 0x1;
-    EICRA |= 0x3;
+    EICRA |= (1 << ISC01) | (0 << ISC00);
+    EIMSK |= (1 << INT0);
 
     // inicializar LCD
     Serial3.write(0xFE);
@@ -850,6 +853,8 @@ void menu(char incommingByte)
                 break;
 
             default:
+                Serial.println("INVLAIDO. Reinicializando menu");
+                PrintMainMenu();
                 break;
             }
         }
@@ -1025,7 +1030,6 @@ void menu(char incommingByte)
                 {
                 case 1:
                 {
-                    cli();
                     struct alarm_status AlarmStatus = retrieveAlarmStatus();
 
                     switch (firstOption) // Switch between alarm 1 and alarm 2
@@ -1045,7 +1049,6 @@ void menu(char incommingByte)
                     }
 
                     setAlarmStatus(AlarmStatus);
-                    sei();
                 }
                     // Fin de elecion de menu
                     operationPos = 0;
@@ -1268,7 +1271,56 @@ ISR(TIMER3_COMPA_vect) // Update LCD
 ISR(INT0_vect)
 {
     // Check which alarm produced the inturrupt and deactivate flag.
+start:
+    control(DS323_ADDRESS, 0); // Inicializamos una operacion de escritura para poder setear el registro de direcciones de la memoria
+    if (R_bit() != 0)
+        goto start;
 
-    // Make noise and print which alarm went off
+    i2c_write_byte(0x0F); // Escribimos el byte de la direccion del dato
+
+    if (R_bit() != 0)
+        goto start;
+
+    control(DS323_ADDRESS, 1); // Sin ninguna instruccion stop inicializamos la operacion de lectura
+    if (R_bit() != 0)
+        goto start;
+
+    byte data = i2c_read_byte();
+
+    E_bit1();
+
+    stop();
+
+start1:
+    control(DS323_ADDRESS, 0); // Inicializamos una operacion de escritura para poder setear el registro de direcciones de la memoria
+    if (R_bit() != 0)
+        goto start1;
+
+    i2c_write_byte(0x0F); // Escribimos el byte de la direccion del dato
+
+    if (R_bit() != 0)
+        goto start1;
+
+    i2c_write_byte(data & 0xFC);
+
+    if (R_bit() != 0)
+        goto start1;
+
+    stop();
+
+    // Make noise based on alarm and print which alarm went off
+
+    if (data & 0x1 != 0)
+    {
+        Serial.println("Ha sonado la alarma 1");
+        tone(37, 3000, 5000);
+    }
+
+    if (data & 0x2 != 0)
+    {
+        Serial.println("Ha sonado la alarma 2");
+        tone(37, 2000, 5000);
+    }
+
     Serial.println("ALARM!!!!!");
 }
