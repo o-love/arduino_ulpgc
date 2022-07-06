@@ -505,7 +505,7 @@ start:
 
     byte data = i2c_read_byte();
 
-    E_bit1;
+    E_bit1();
 
     stop();
 
@@ -518,6 +518,60 @@ start:
 
 void setAlarmStatus(struct alarm_status alarmSatus)
 {
+
+    // Activate inturrupts in the control register
+
+start2:
+    control(DS323_ADDRESS, 0); // Inicializamos una operacion de escritura para poder setear el registro de direcciones de la memoria
+    if (R_bit() != 0)
+        goto start2;
+
+    i2c_write_byte(0x0E); // Escribimos el byte de la direccion del dato
+
+    if (R_bit() != 0)
+        goto start2;
+
+    // We first retrive the registeer in order to modify the desired bits
+    control(DS323_ADDRESS, 1); // Sin ninguna instruccion stop inicializamos la operacion de lectura
+    if (R_bit() != 0)
+        goto start2;
+
+    byte data = i2c_read_byte();
+
+    E_bit1();
+
+    stop();
+
+    // Modify the registers
+
+    data = data & 0xFC;
+
+    if (alarmSatus.alarm1Active)
+    {
+        data |= 0x1;
+    }
+    if (alarmSatus.alarm2Active)
+    {
+        data |= 0x2;
+    }
+
+    // Store the registers
+start3:
+    control(DS323_ADDRESS, 0); // Inicializamos una operacion de escritura para poder setear el registro de direcciones de la memoria
+    if (R_bit() != 0)
+        goto start3;
+
+    i2c_write_byte(0x0E); // Escribimos el byte de la direccion del dato
+
+    if (R_bit() != 0)
+        goto start3;
+
+    i2c_write_byte(data);
+
+    if (R_bit() != 0)
+        goto start3;
+
+    stop();
 }
 
 float retrieveTemp()
@@ -554,6 +608,113 @@ void PrintMainMenu()
     Serial.println("2: Configurar fecha");
     Serial.println("3: Configurar alarma");
     Serial.print("Introduce dato: ");
+}
+
+void AlarmSetup()
+// Set alarm mask
+{
+    struct
+    {
+        byte alarm_1_seconds;
+        byte alarm_1_minutes;
+        byte alarm_1_hours;
+        byte alarm_1_day;
+        byte alarm_2_minutes;
+        byte alarm_2_hours;
+        byte alarm_2_day;
+    } alarmRegisters;
+
+    // Retrive alarm registers
+start:
+    control(DS323_ADDRESS, 0); // Inicializamos una operacion de escritura para poder setear el registro de direcciones de la memoria
+    if (R_bit() != 0)
+        goto start;
+
+    i2c_write_byte(0x07); // Escribimos el byte de la direccion del dato
+
+    if (R_bit() != 0)
+        goto start;
+
+    control(DS323_ADDRESS, 1); // Sin ninguna instruccion stop inicializamos la operacion de lectura
+    if (R_bit() != 0)
+        goto start;
+
+    alarmRegisters.alarm_1_seconds = i2c_read_byte();
+    E_bit0();
+
+    alarmRegisters.alarm_1_minutes = i2c_read_byte();
+    E_bit0();
+
+    alarmRegisters.alarm_1_hours = i2c_read_byte();
+    E_bit0();
+
+    alarmRegisters.alarm_1_day = i2c_read_byte();
+    E_bit0();
+
+    alarmRegisters.alarm_2_minutes = i2c_read_byte();
+    E_bit0();
+
+    alarmRegisters.alarm_2_hours = i2c_read_byte();
+    E_bit0();
+
+    alarmRegisters.alarm_2_day = i2c_read_byte();
+    E_bit1();
+
+    stop();
+
+    // modify alarm registers activating and deactivating the apropriate mask bits
+
+    // Alarm 1
+    alarmRegisters.alarm_1_seconds &= 0x7F;
+    alarmRegisters.alarm_1_minutes &= 0x7F;
+    alarmRegisters.alarm_1_hours &= 0x7F;
+    alarmRegisters.alarm_1_day |= 0x80;
+
+    // Alarm 2
+    alarmRegisters.alarm_2_minutes &= 0x7F;
+    alarmRegisters.alarm_2_hours &= 0x7F;
+    alarmRegisters.alarm_2_day |= 0x80;
+
+    // store alarm registers
+start1:
+    control(DS323_ADDRESS, 0); // Inicializamos una operacion de escritura para poder setear el registro de direcciones de la memoria
+    if (R_bit() != 0)
+        goto start1;
+
+    i2c_write_byte(0x07); // Escribimos el byte de la direccion del dato
+
+    if (R_bit() != 0)
+        goto start1;
+
+    i2c_write_byte(alarmRegisters.alarm_1_seconds);
+    if (R_bit() != 0)
+        goto start1;
+
+    i2c_write_byte(alarmRegisters.alarm_1_minutes);
+    if (R_bit() != 0)
+        goto start1;
+
+    i2c_write_byte(alarmRegisters.alarm_1_hours);
+    if (R_bit() != 0)
+        goto start1;
+
+    i2c_write_byte(alarmRegisters.alarm_1_day);
+    if (R_bit() != 0)
+        goto start1;
+
+    i2c_write_byte(alarmRegisters.alarm_2_minutes);
+    if (R_bit() != 0)
+        goto start1;
+
+    i2c_write_byte(alarmRegisters.alarm_2_hours);
+    if (R_bit() != 0)
+        goto start1;
+
+    i2c_write_byte(alarmRegisters.alarm_2_day);
+    if (R_bit() != 0)
+        goto start1;
+
+    stop();
 }
 
 void setup()
@@ -608,6 +769,9 @@ void setup()
 
     // Imprimir menu principal en el terminal virtual
     PrintMainMenu();
+
+    // inicializar la alarma para que toque cuando concida la hora, minutos y segundos con la fecha/hora actual.
+    AlarmSetup();
 }
 
 int cSelected = 0;
@@ -859,7 +1023,6 @@ void menu(char incommingByte)
                 {
                     cli();
                     struct alarm_status AlarmStatus = retrieveAlarmStatus();
-                    sei();
 
                     switch (firstOption) // Switch between alarm 1 and alarm 2
                     {
@@ -877,7 +1040,6 @@ void menu(char incommingByte)
                         break;
                     }
 
-                    cli();
                     setAlarmStatus(AlarmStatus);
                     sei();
                 }
