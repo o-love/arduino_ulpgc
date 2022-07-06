@@ -431,25 +431,58 @@ start6:
     return date;
 }
 
-void write_seconds(byte toWrite) {}
+void inicializeD3232()
+{
+    // Set alarm to go off every hour minute match 0x1000
 
-void write_minutes(byte toWrite) {}
+    // Set to 24hour mode
+}
 
-void write_hours(byte toWrite) {}
+#define SECONDS_DS3232 0x00
+#define MINUTES_DS3232 0x01
+#define HOURS_DS3232 0x02
+#define DATE_DS3232 0x04
+#define MONTH_DS3232 0x05
+#define YEAR_DS3232 0x06
+#define MINUTES_ALARM_1 0x08
+#define HOURS_ALARM_1 0x09
+#define MINUTES_ALARM_2 0x0B
+#define HOURS_ALARM_2 0x0C
 
-void write_date(byte toWrite) {}
+#define SECONDS_MAX 60
+#define MINUTES_MAX 60
+#define HOURS_MAX 24
+#define DATE_MAX 31
+#define MONTH_MAX 12
+#define YEAR_MAX 99
 
-void write_month(byte toWrite) {}
+void write_DS3232(byte toWrite, byte memoryPos, byte maxValue)
+{
+start:
+    control(DS323_ADDRESS, 0); // Inicializamos una operacion de escritura para poder setear el registro de direcciones de la memoria
+    if (R_bit() != 0)
+        goto start;
 
-void write_year(byte toWrite) {}
+    i2c_write_byte(memoryPos); // Escribimos el byte de la direccion del dato
 
-void write_minutes_alarm1(byte toWrite) {}
+    if (R_bit() != 0)
+        goto start;
 
-void write_hours_alarm1(byte toWrite) {}
+    if (maxValue > 60)
+    {
+        Serial.print("Input invalid, over ");
+        Serial.println(maxValue);
+        return;
+    }
 
-void write_minutes_alarm2(byte toWrite) {}
+    toWrite = ((toWrite / 10) << 4) + (toWrite % 10);
+    i2c_write_byte(toWrite);
 
-void write_hours_alarm2(byte toWrite) {}
+    if (R_bit() != 0)
+        goto start;
+
+    stop();
+}
 
 float retrieveTemp()
 {
@@ -475,6 +508,14 @@ start:
 
     stop();
     return toReturn;
+}
+
+void PrintMainMenu()
+{
+    Serial.println("Elejir entre las siguientes opciones. Introduce el numero asociado y pulsa enter");
+    Serial.println("1: Configurar hora");
+    Serial.println("2: Configurar fecha");
+    Serial.println("Introduce dato: ");
 }
 
 void setup()
@@ -526,10 +567,242 @@ void setup()
     delay(100);
 
     sei();
+
+    // Imprimir menu principal en el terminal virtual
+    PrintMainMenu();
 }
 
-void menu(char c)
+int cSelected = 0;
+bool isReadingWord = true;
+int operationPos = 0;
+int wordReading = 0;
+int firstOption = 0;
+int secondOption = 0;
+
+void buildWord(char c)
 {
+    wordReading = wordReading * 10;
+    int toAdd = c - '0';
+    Serial.print(toAdd);
+    wordReading = wordReading + toAdd;
+}
+
+void menu(char incommingByte)
+{
+    if ((int)incommingByte == 13) // if enter
+    {
+        isReadingWord = false;
+    }
+    else if (!(incommingByte >= '0' && incommingByte <= '9')) // Check if input is valid
+    {
+        Serial.println(incommingByte);
+        Serial.println("Introduce un numero, empieza de nuevo.");
+        wordReading = 0;
+        return;
+    }
+
+    if (isReadingWord)
+    {
+        buildWord(incommingByte);
+    }
+    else
+    {
+        if (operationPos == 0)
+        {
+            isReadingWord = true;
+            cSelected = wordReading;
+            Serial.println("");
+            switch (cSelected)
+            {
+            case 1: // Cambiar tiempo
+                Serial.println("Elige de las siguientes opciones: ");
+                Serial.println("1: Cambiar segundos");
+                Serial.println("2: Cambiar minutos");
+                Serial.println("3: Cambiar horas");
+                Serial.print("Intoduce datos: ");
+
+                operationPos++;
+                break;
+
+            case 2: // Cambiar fecha
+                Serial.println("Elige entre la siguiente opciones: ");
+                Serial.println("Cambiar dia");
+                Serial.println("Cambiar mes");
+                Serial.println("Cambiar año");
+                Serial.print("Introduce datos: ");
+
+                operationPos++;
+                break;
+
+            default:
+                break;
+            }
+        }
+        else if (operationPos == 1)
+        {
+            firstOption = wordReading;
+            Serial.println("");
+            switch (cSelected)
+            {
+            case 1: // Opciones de cambia de hora
+                switch (firstOption)
+                {
+                case 1: // Cambio de segundo
+                    Serial.print("Introduce segundos: ");
+
+                    operationPos++;
+                    break;
+
+                case 2: // cambio de minutos
+                    Serial.print("Introduce minutos: ");
+
+                    operationPos++;
+                    break;
+
+                case 3: // cambio de fecha
+                    Serial.print("Introduce horas: ");
+
+                    operationPos++;
+                    break;
+
+                default:
+                    operationPos = 0;
+                    Serial.println("INVLAIDO. Reinicializando menu");
+                    PrintMainMenu();
+                    break;
+                }
+                break;
+
+            case 2:
+                switch (firstOption)
+                {
+                case 1: // Cambio de dia
+                    Serial.print("Introduce dia: ");
+
+                    operationPos++;
+                    break;
+
+                case 2: // cambio de minutos
+                    Serial.print("Introduce mes: ");
+
+                    operationPos++;
+                    break;
+
+                case 3: // cambio de año
+                    Serial.print("Introduce año: ");
+
+                    operationPos++;
+                    break;
+
+                default:
+                    operationPos = 0;
+                    Serial.println("INVLAIDO. Reinicializando menu");
+                    PrintMainMenu();
+                    break;
+                }
+                break;
+
+            default:
+                operationPos = 0;
+                Serial.println("INVLAIDO. Reinicializando menu");
+                PrintMainMenu();
+                break;
+            }
+        }
+        else if (operationPos == 2)
+        {
+            secondOption = wordReading;
+            Serial.println("");
+
+            switch (cSelected)
+            {
+            case 1: // Opciones de cambia de hora
+                switch (firstOption)
+                {
+                case 1: // Cambio de segundo
+                    write_DS3232(secondOption, SECONDS_DS3232, SECONDS_MAX);
+                    Serial.println("Segundos cambiado");
+
+                    // Fin de elecion de menu
+                    operationPos = 0;
+                    PrintMainMenu();
+                    break;
+
+                case 2: // cambio de minutos
+                    write_DS3232(secondOption, MINUTES_DS3232, MINUTES_MAX);
+                    Serial.println("Minutos cambiado");
+
+                    // Fin de elecion de menu
+                    operationPos = 0;
+                    PrintMainMenu();
+                    break;
+
+                case 3: // cambio de horas
+                    write_DS3232(secondOption, HOURS_DS3232, HOURS_MAX);
+                    Serial.println("Horas cambiado");
+
+                    // Fin de elecion de menu
+                    operationPos = 0;
+                    PrintMainMenu();
+                    break;
+
+                default:
+                    operationPos = 0;
+                    Serial.println("INVLAIDO. Reinicializando menu");
+                    PrintMainMenu();
+                    break;
+                }
+                break;
+
+            case 2:
+                switch (firstOption)
+                {
+                case 1: // Cambio de dia
+                    write_DS3232(secondOption, DATE_DS3232, DATE_MAX);
+                    Serial.println("dia cambiado");
+
+                    // Fin de elecion de menu
+                    operationPos = 0;
+                    PrintMainMenu();
+                    break;
+
+                case 2: // cambio de mes
+                    write_DS3232(secondOption, MONTH_DS3232, MONTH_MAX);
+                    Serial.println("Mes cambiado");
+
+                    // Fin de elecion de menu
+                    operationPos = 0;
+                    PrintMainMenu();
+                    break;
+
+                case 3: // cambio de año
+                    write_DS3232(secondOption, YEAR_DS3232, YEAR_MAX);
+                    Serial.println("Horas cambiado");
+
+                    // Fin de elecion de menu
+                    operationPos = 0;
+                    PrintMainMenu();
+                    break;
+
+                default:
+                    operationPos = 0;
+                    Serial.println("INVLAIDO. Reinicializando menu");
+                    PrintMainMenu();
+                    break;
+                }
+                break;
+
+            default:
+                operationPos = 0;
+                Serial.println("INVLAIDO. Reinicializando menu");
+                PrintMainMenu();
+                break;
+            }
+        }
+
+        wordReading = 0;
+        isReadingWord = true;
+    }
 }
 
 ISR(TIMER1_COMPA_vect)
