@@ -760,18 +760,22 @@ void setup()
     // Habilitamos interrupciones para el timer con OCIE1A
     TIMSK1 = B00000010;
 
+    // Habilitar interrupciones externa
+    EIMSK |= 0x1;
+    EICRA |= 0x3;
+
     // inicializar LCD
     Serial3.write(0xFE);
     Serial3.write(0);
     delay(100);
 
+    // inicializar la alarma para que toque cuando concida la hora, minutos y segundos con la fecha/hora actual.
+    AlarmSetup();
+
     sei();
 
     // Imprimir menu principal en el terminal virtual
     PrintMainMenu();
-
-    // inicializar la alarma para que toque cuando concida la hora, minutos y segundos con la fecha/hora actual.
-    AlarmSetup();
 }
 
 int cSelected = 0;
@@ -1259,4 +1263,12 @@ ISR(TIMER3_COMPA_vect) // Update LCD
 
     sprintf(buffer, "%02d%s%02d", Date.date, months[Date.month - 1], Date.year);
     Serial3.write(buffer);
+}
+
+ISR(INT0_vect)
+{
+    // Check which alarm produced the inturrupt and deactivate flag.
+
+    // Make noise and print which alarm went off
+    Serial.println("ALARM!!!!!");
 }
