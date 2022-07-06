@@ -468,9 +468,10 @@ start:
     if (R_bit() != 0)
         goto start;
 
-    if (maxValue > 60)
+    if (toWrite > maxValue) // Si el valor a escribir es mayor que el valor que acepta el DS3232 no le mandamos el dato.
     {
-        Serial.print("Input invalid, over ");
+        Serial.print(toWrite);
+        Serial.print("; Input invalid, over ");
         Serial.println(maxValue);
         return;
     }
@@ -512,10 +513,11 @@ start:
 
 void PrintMainMenu()
 {
+    Serial.println("");
     Serial.println("Elejir entre las siguientes opciones. Introduce el numero asociado y pulsa enter");
     Serial.println("1: Configurar hora");
     Serial.println("2: Configurar fecha");
-    Serial.println("Introduce dato: ");
+    Serial.print("Introduce dato: ");
 }
 
 void setup()
@@ -626,9 +628,9 @@ void menu(char incommingByte)
 
             case 2: // Cambiar fecha
                 Serial.println("Elige entre la siguiente opciones: ");
-                Serial.println("Cambiar dia");
-                Serial.println("Cambiar mes");
-                Serial.println("Cambiar año");
+                Serial.println("1: Cambiar dia");
+                Serial.println("2: Cambiar mes");
+                Serial.println("3: Cambiar año");
                 Serial.print("Introduce datos: ");
 
                 operationPos++;
