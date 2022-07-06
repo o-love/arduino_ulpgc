@@ -737,6 +737,12 @@ void setup()
     digitalWrite(ESC_SDA, HIGH);
     digitalWrite(ESC_SCL, HIGH);
 
+    // Initialize 7 bit display
+    DDRA = 0xFF;
+    PORTA = 0xFF;
+    DDRL |= 0x0F;
+    PORTL |= 0x0F;
+
     cli();
     // Queremos initializar el Timer 3 a modo CTC de tal forma que genere una interrupcion cada segundo.
     TCCR3A = 0;
@@ -1157,11 +1163,43 @@ void menu(char incommingByte)
     }
 }
 
+int mostrarNum[] = {0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x67, /*A*/ 0x77, /*B*/ 0x7C, 0x39, 0x5E, 0x79, 0x71};
+
 ISR(TIMER1_COMPA_vect)
 {
     if (Serial.available())
     {
         menu(Serial.read());
+    }
+
+    static int interleave = 0;
+
+    switch (interleave)
+    {
+    case 0:
+        PORTL = ~0x01;
+        PORTA = mostrarNum[(wordReading) % 10];
+        interleave++;
+        break;
+    case 1:
+        PORTL = ~0x02;
+        PORTA = mostrarNum[(wordReading / 10) % 10];
+        interleave++;
+        break;
+    case 2:
+        PORTL = ~0x04;
+        PORTA = mostrarNum[(wordReading / 100) % 10];
+        interleave++;
+        break;
+    case 3:
+        PORTL = ~0x08;
+        PORTA = mostrarNum[(wordReading / 1000) % 10];
+        interleave = 0;
+        break;
+
+    default:
+        interleave = 0;
+        break;
     }
 }
 
