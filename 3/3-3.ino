@@ -410,10 +410,6 @@ start6:
     i2c_read_byte();
     E_bit0();
 
-    // Alarm2 second
-    i2c_read_byte();
-    E_bit0();
-
     // Alarm2 minute
     temp = i2c_read_byte();
     date.alarm2Minute = temp & 0xF;
@@ -556,6 +552,7 @@ void PrintMainMenu()
     Serial.println("Elejir entre las siguientes opciones. Introduce el numero asociado y pulsa enter");
     Serial.println("1: Configurar hora");
     Serial.println("2: Configurar fecha");
+    Serial.println("3: Configurar alarma");
     Serial.print("Introduce dato: ");
 }
 
@@ -666,10 +663,19 @@ void menu(char incommingByte)
                 break;
 
             case 2: // Cambiar fecha
-                Serial.println("Elige entre la siguiente opciones: ");
+                Serial.println("Elige entre las siguiente opciones: ");
                 Serial.println("1: Cambiar dia");
                 Serial.println("2: Cambiar mes");
                 Serial.println("3: Cambiar año");
+                Serial.print("Introduce datos: ");
+
+                operationPos++;
+                break;
+
+            case 3:
+                Serial.println("Elige entre las sigueitnes opciones: ");
+                Serial.println("1: Opciones Alarma1");
+                Serial.println("2: Opciones Alarma2");
                 Serial.print("Introduce datos: ");
 
                 operationPos++;
@@ -679,6 +685,7 @@ void menu(char incommingByte)
                 break;
             }
         }
+        // Second level
         else if (operationPos == 1)
         {
             firstOption = wordReading;
@@ -743,6 +750,17 @@ void menu(char incommingByte)
                 }
                 break;
 
+            case 3:
+
+                Serial.println("Elige entre las siguiente opciones: ");
+                Serial.println("1: Encender/Apagar alarma");
+                Serial.println("2: Cambiar minutos");
+                Serial.println("3: Cambiar horas");
+                Serial.print("Introduce datos: ");
+
+                operationPos++;
+                break;
+
             default:
                 operationPos = 0;
                 Serial.println("INVLAIDO. Reinicializando menu");
@@ -750,6 +768,7 @@ void menu(char incommingByte)
                 break;
             }
         }
+        // Third level
         else if (operationPos == 2)
         {
             secondOption = wordReading;
@@ -821,6 +840,129 @@ void menu(char incommingByte)
                     Serial.println("Horas cambiado");
 
                     // Fin de elecion de menu
+                    operationPos = 0;
+                    PrintMainMenu();
+                    break;
+
+                default:
+                    operationPos = 0;
+                    Serial.println("INVLAIDO. Reinicializando menu");
+                    PrintMainMenu();
+                    break;
+                }
+                break;
+
+            case 3:
+                switch (secondOption) // Switch between type of alarm opration
+                {
+                case 1:
+                {
+                    cli();
+                    struct alarm_status AlarmStatus = retrieveAlarmStatus();
+                    sei();
+
+                    switch (firstOption) // Switch between alarm 1 and alarm 2
+                    {
+                    case 1:
+                        AlarmStatus.alarm1Active = !AlarmStatus.alarm1Active;
+                        break;
+
+                    case 2:
+                        AlarmStatus.alarm2Active = !AlarmStatus.alarm2Active;
+                        break;
+                    default:
+                        operationPos = 0;
+                        Serial.println("INVLAIDO. Reinicializando menu");
+                        PrintMainMenu();
+                        break;
+                    }
+
+                    cli();
+                    setAlarmStatus(AlarmStatus);
+                    sei();
+                }
+                    // Fin de elecion de menu
+                    operationPos = 0;
+                    PrintMainMenu();
+                    break;
+
+                case 2:
+                    Serial.print("Introduce minutos: ");
+                    operationPos++;
+                    break;
+
+                case 3:
+                    Serial.print("Introduce hora: ");
+                    operationPos++;
+                    break;
+
+                default:
+                    operationPos = 0;
+                    Serial.println("INVLAIDO. Reinicializando menu");
+                    PrintMainMenu();
+                    break;
+                }
+                break;
+
+            default:
+                operationPos = 0;
+                Serial.println("INVLAIDO. Reinicializando menu");
+                PrintMainMenu();
+                break;
+            }
+        }
+        // Forth level
+        else if (operationPos == 3)
+        {
+            Serial.println("");
+            switch (cSelected)
+            {
+            case 3:
+
+                switch (secondOption) // Switch between type of alarm opration
+                {
+                case 2: // Change minutes
+
+                    switch (firstOption) // Switch entre distinto alarmas
+                    {
+                    case 1:
+                        write_DS3232(wordReading, MINUTES_ALARM_1, MINUTES_MAX);
+                        Serial.println("Actualizado minutos de alarma 1");
+                        break;
+
+                    case 2:
+                        write_DS3232(wordReading, MINUTES_ALARM_2, MINUTES_MAX);
+                        Serial.println("Actualizado minutos de alarma 2");
+                        break;
+
+                    default:
+                        break;
+                    }
+
+                    // Fin
+                    operationPos = 0;
+                    PrintMainMenu();
+                    break;
+
+                case 3: // Change hour
+
+                    switch (firstOption) // Switch entre distinto alarmas
+                    {
+                    case 1:
+                        write_DS3232(wordReading, HOURS_ALARM_1, HOURS_MAX);
+                        Serial.println("Actualizado horas de alarma 1");
+                        break;
+
+                    case 2:
+                        write_DS3232(wordReading, HOURS_ALARM_2, HOURS_MAX);
+                        Serial.println("Actualizado horas de alarma 2");
+                        break;
+
+                    default:
+                        break;
+                    }
+
+                    // Fin
                     operationPos = 0;
                     PrintMainMenu();
                     break;
