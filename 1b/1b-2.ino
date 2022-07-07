@@ -20,24 +20,25 @@ void fastPwm3_ini(int freq)
     // Calculamos el valor mas pequeño de n capaz de trabajar con la frequencia pasado para aumentar la precision.
     int n;
     int prescale;
+    // Los valores de frecuencia vienen establecidos por la frecuencia que cada prescalar es capaz de conseguir con fast PWM
     if (freq < 4)
     {
-        prescale = 4; // 256
+        prescale = 4; // prescalar = 256
         n = 256;
     }
     else if (freq < 31)
     {
-        prescale = 3; // 64
+        prescale = 3; // prescalar = 64
         n = 64;
     }
     else if (freq < 245)
     {
-        prescale = 2; // 8
+        prescale = 2; // prescalar = 8
         n = 8;
     }
     else
     {
-        prescale = 1; // 1
+        prescale = 1; // prescalar = 1
         n = 1;
     }
 
@@ -63,44 +64,46 @@ void fastPwm3_ini(int freq)
 
 void fastPwm3_gen(int pin, int percent)
 {
-    // Convertimos grado en porcentaje de valor.
+    // calculamos el valor del registro OCR para el porcentaje pasado
     int value = (int)(((double)TOP_ + 1.) * ((double)percent / 100.));
     Serial.println(value);
 
     pinMode(pin, OUTPUT); // Habilitar pin de OC3(pin)
 
+    // Como cada uno de los pines tiene su propio registro OCR detectamos cual es y modificamos ese registro
     if (pin == 5)
     {
-        TCCR3A |= (1 << COM3A1);
-        OCR3A = value;
+        TCCR3A |= (1 << COM3A1); // B10: Clear on compare match, set on BOTTOM
+        OCR3A = value;           // Metemos el valor OCR para consegurir el duty cycle necesario
     }
     else if (pin == 2)
     {
-        TCCR3A |= (1 << COM3B1);
-        OCR3B = value;
+        TCCR3A |= (1 << COM3B1); // B10: Clear on compare match, set on BOTTOM
+        OCR3B = value;           // Metemos el valor OCR para consegurir el duty cycle necesario
     }
     else if (pin == 3)
     {
-        TCCR3A |= (1 << COM3C1);
-        OCR3C = value;
+        TCCR3A |= (1 << COM3C1); // B10: Clear on compare match, set on BOTTOM
+        OCR3C = value;           // Metemos el valor OCR para consegurir el duty cycle necesario
     }
 }
 
 void setup()
 {
     Serial.begin(9600);
+}
 
+void loop()
+{
     fastPwm3_ini(2400);
     fastPwm3_gen(5, 25); // OC3A, 25% de TOP
     fastPwm3_gen(2, 50); // OC3B, 50% “”
     fastPwm3_gen(3, 90); // OC3C, 90% “”
     delay(1000);
-}
 
-void loop()
-{
-}
-
-ISR(TIMER3_COMPA_vect)
-{
+    fastPwm3_ini(24000);
+    fastPwm3_gen(5, 30); // OC3A, 25% de TOP
+    fastPwm3_gen(2, 60); // OC3B, 50% “”
+    fastPwm3_gen(3, 80); // OC3C, 90% “”
+    delay(1000);
 }
