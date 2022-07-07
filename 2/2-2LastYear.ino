@@ -329,6 +329,8 @@ void setup()
     digitalWrite(ESC_SDA, HIGH);
     digitalWrite(ESC_SCL, HIGH);
 
+    Serial.println("");
+    Serial.println("");
     Serial.println("1:  Guardar un dato (de 0 a 255) en cualquier dirección de memoria del dispositivo 24LC64.");
     Serial.println("2:  Leer una posición (de 0 a 8191) del 24LC64");
     Serial.println("3:  Inicializar toda la memoria del 24LC64 a un valor");
@@ -337,8 +339,7 @@ void setup()
     Serial.println("6:  Mostrar el contenido de un bloque de 256 bytes del 24LC64 (Sequential Read), comenzando en una dirección especificada");
     Serial.println("7:  Mostrar la fecha y hora tomado del RTC");
     Serial.println("8:  Mostrarla temperatura leida del RTC");
-    Serial.println("Despues de introducir cada valor pulsa enter");
-    Serial.println("Input Operation number: ");
+    Serial.println("Introducir dato, pulsa enter tras introducir: ");
 }
 int cSelected = 0;
 bool isReadingWord = true;
