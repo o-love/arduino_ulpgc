@@ -553,6 +553,7 @@ start:
 void PrintMainMenu()
 {
     Serial.println("");
+    Serial.println("");
     Serial.println("Elejir entre las siguientes opciones. Introduce el numero asociado y pulsa enter");
     Serial.println("1: Configurar hora");
     Serial.println("2: Configurar fecha");
