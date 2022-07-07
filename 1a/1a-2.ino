@@ -44,6 +44,14 @@ void setup()
                    // se lee el puerto y se hace el "or" con la máscara B00001111 para poner los 4 bits
                    // menos significativos a "1". Los 4 bits superiores quedan como estaban: no se modifican
                    // Otra forma: pinMode(D4, OUTPUT); pinMode() para programar pin a pin (en este caso D4)
+
+    Serial.println("1: Parpadeo de las unidades");
+    Serial.println("2: Parpadeo de las decenas");
+    Serial.println("3: Parpadeo de las centenas");
+    Serial.println("4: Parpadeo de las unidades del millar");
+    Serial.println("5: Parpadeo secuencial de todos los digitos");
+    Serial.println("6: Selecion del caracter hexadecimal(0-F) a visualizar");
+    Serial.println("Seleciona: ");
 }
 
 void loop()
