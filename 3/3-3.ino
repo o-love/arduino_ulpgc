@@ -607,7 +607,7 @@ void PrintMainMenu()
     Serial.println("1: Configurar hora");
     Serial.println("2: Configurar fecha");
     Serial.println("3: Configurar alarma");
-    Serial.print("Introduce dato: ");
+    Serial.print("Introduce dato, pulsa enter tras introducir dato: ");
 }
 
 void AlarmSetup()
