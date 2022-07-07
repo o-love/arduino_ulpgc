@@ -55,6 +55,7 @@ void setup()
     // Imprimimos menu
     Serial.println("1.- Mostrar el contador en los dos dígitos inferiores del display (decenas-unidades)");
     Serial.println("2.- Mostrar el contador en los dos dígitos superiores del display (millares-centenas)");
+    Serial.println("Entrada: ");
 }
 
 bool isDisplayUpperNotLower = false;
@@ -68,14 +69,17 @@ void loop()
         switch (Serial.read())
         {
         case '1':
+            Serial.println("1");
             isDisplayUpperNotLower = false;
             break;
 
         case '2':
+            Serial.println("2");
             isDisplayUpperNotLower = true;
             break;
 
         default:
+            Serial.println("Entrada invalido, solo se permite '1' y '2'.");
             break;
         }
     }
@@ -83,140 +87,139 @@ void loop()
     // Actualizamos la temperatura cada iteracion.
     temp();
 
-    // Control de pulsadores
+    // Control de pulsadores con la que reazlizamos la consulta de estado.
     controles();
 }
 
 void controles()
 {
-
-    // Incremento
+    // Incremento, up
     {
-        static bool lastWasHigh = true;
+        static bool lastWasHigh = true; // Guardar si la ultima iteracion la señal era activa para asi detectar los cambios de signo
         if (digitalRead(P_UP) == LOW)
         {
-            static unsigned long debounceCounter = 0;
+            static unsigned long debounceCounter = 0; // Guardar el tiempo desde que la señal estaba bajo para evitar debounce
 
-            if (millis() - debounceCounter < 50 || !lastWasHigh)
+            if (millis() - debounceCounter < 50 || !lastWasHigh) // Si no se produce cambio de signo o el cambio de signo se produce durante el tiempo debounce actualizamos el tiempo debounce
             {
                 debounceCounter = millis();
             }
             else
             {
-                contador += countBy;
-                if (contador > 99)
+                contador += countBy; // Aumento de contador por 1 o 2 segun se proceda
+                if (contador > 99)   // Detecar si nos sobrepasamos del limite superior
                 {
-                    contador = contador - 100;
+                    contador = contador - 100; // Al pasar el limite superior volvemos al limite inferior con la cantidad de digitos con la que sobrepasamos (100 pasa a 0, 101 pasa a 1, etc)
                 }
 
-                tone(37, 3000, 500);
+                tone(37, 3000, 500); // Ruido indicando pulsacion de boton
             }
-            lastWasHigh = false;
+            lastWasHigh = false; // Guardar que en esta iteracion la tension era baja
         }
         else
         {
-            lastWasHigh = true;
+            lastWasHigh = true; // Guardar que en esta iteracion la tension era alta
         }
     }
 
-    // Decremento
+    // Decremento, down
     {
-        static bool lastWasHigh = true;
+        static bool lastWasHigh = true; // Guardar si la ultima iteracion la señal era activa para asi detectar los cambios de signo
         if (digitalRead(P_DOWN) == LOW)
         {
-            static unsigned long debounceCounter = 0;
+            static unsigned long debounceCounter = 0; // Guardar el tiempo desde que la señal estaba bajo para evitar debounce
 
-            if (millis() - debounceCounter < 50 || !lastWasHigh)
+            if (millis() - debounceCounter < 50 || !lastWasHigh) // Si no se produce cambio de signo o el cambio de signo se produce durante el tiempo debounce actualizamos el tiempo debounce
             {
                 debounceCounter = millis();
             }
             else
             {
-                contador -= countBy;
-                if (contador < 0)
+                contador -= countBy; // Dieminuimos el contador por 1 o 2 segun proceda
+                if (contador < 0)    // Detecatamos cuando nos pasamos por debajo del limite inferior
                 {
-                    contador = 100 + contador;
+                    contador = 100 + contador; // Restamos al limite superior por el numero de valores que sobrepasamos el limite inferior (-1 -> 99, -2 -> 98, etc)
                 }
 
-                tone(37, 3000, 500);
+                tone(37, 3000, 500); // Ruido indicando pulsacion de boton
             }
-            lastWasHigh = false;
+            lastWasHigh = false; // Guardar que en esta iteracion la tension era baja
         }
         else
         {
-            lastWasHigh = true;
+            lastWasHigh = true; // Guardar que en esta iteracion la tension era alta
         }
     }
 
     // Reset
     {
-        static bool lastWasHigh = true;
+        static bool lastWasHigh = true; // Guardar si la ultima iteracion la señal era activa para asi detectar los cambios de signo
         if (digitalRead(P_CENTRE) == LOW)
         {
-            static unsigned long debounceCounter = 0;
+            static unsigned long debounceCounter = 0; // Guardar el tiempo desde que la señal estaba bajo para evitar debounce
 
-            if (millis() - debounceCounter < 50 || !lastWasHigh)
+            if (millis() - debounceCounter < 50 || !lastWasHigh) // Si no se produce cambio de signo o el cambio de signo se produce durante el tiempo debounce actualizamos el tiempo debounce
             {
                 debounceCounter = millis();
             }
             else
             {
-                contador = 0;
-                tone(37, 3000, 500);
+                contador = 0;        // Ponemos el contador a cero
+                tone(37, 3000, 500); // Ruido indicando pulsacion de boton
             }
-            lastWasHigh = false;
+            lastWasHigh = false; // Guardar que en esta iteracion la tension era baja
         }
         else
         {
-            lastWasHigh = true;
+            lastWasHigh = true; // Guardar que en esta iteracion la tension era alta
         }
     }
 
     // Right, count by 2
     {
-        static bool lastWasHigh = true;
+        static bool lastWasHigh = true; // Guardar si la ultima iteracion la señal era activa para asi detectar los cambios de signo
         if (digitalRead(P_RIGHT) == LOW)
         {
-            static unsigned long debounceCounter = 0;
+            static unsigned long debounceCounter = 0; // Guardar el tiempo desde que la señal estaba bajo para evitar debounce
 
-            if (millis() - debounceCounter < 50 || !lastWasHigh)
+            if (millis() - debounceCounter < 50 || !lastWasHigh) // Si no se produce cambio de signo o el cambio de signo se produce durante el tiempo debounce actualizamos el tiempo debounce
             {
                 debounceCounter = millis();
             }
             else
             {
-                countBy = 2;
-                tone(37, 3000, 500);
+                countBy = 2;         // Fijamos el paso con la que se cuenta a 2
+                tone(37, 3000, 500); // Ruido indicando pulsacion de boton
             }
-            lastWasHigh = false;
+            lastWasHigh = false; // Guardar que en esta iteracion la tension era baja
         }
         else
         {
-            lastWasHigh = true;
+            lastWasHigh = true; // Guardar que en esta iteracion la tension era alta
         }
     }
 
     // Left, count by 1
     {
-        static bool lastWasHigh = true;
+        static bool lastWasHigh = true; // Guardar si la ultima iteracion la señal era activa para asi detectar los cambios de signo
         if (digitalRead(P_LEFT) == LOW)
         {
-            static unsigned long debounceCounter = 0;
+            static unsigned long debounceCounter = 0; // Guardar el tiempo desde que la señal estaba bajo para evitar debounce
 
-            if (millis() - debounceCounter < 50 || !lastWasHigh)
+            if (millis() - debounceCounter < 50 || !lastWasHigh) // Si no se produce cambio de signo o el cambio de signo se produce durante el tiempo debounce actualizamos el tiempo debounce
             {
                 debounceCounter = millis();
             }
             else
             {
-                countBy = 1;
-                tone(37, 3000, 500);
+                countBy = 1;         // Fijamos el paso con la que se cuenta a 1
+                tone(37, 3000, 500); // Ruido indicando pulsacion de boton
             }
-            lastWasHigh = false;
+            lastWasHigh = false; // Guardar que en esta iteracion la tension era baja
         }
         else
         {
-            lastWasHigh = true;
+            lastWasHigh = true; // Guardar que en esta iteracion la tension era alta
         }
     }
 }
