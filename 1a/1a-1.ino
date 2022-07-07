@@ -46,26 +46,30 @@ void loop()
     Serial.println("Hola mundo!");
 
     // encender y apagar el dígito de las unidades
+    tone(37, 3000, 1000);
     digitalWrite(D4, LOW);  // activamos unidades
-    delay(2000);            // pausa de medio segundo (500 ms)
+    delay(1000);            // pausa de medio segundo (500 ms)
     digitalWrite(D4, HIGH); // desactivamos unidades
-    delay(2000);            // pausa de medio segundo (500 ms)
+    delay(1000);            // pausa de medio segundo (500 ms)
 
     // encender y apagar el dígito de las decimas
+    tone(37, 3000, 1000);
     digitalWrite(D3, LOW);  // activamos decimas
-    delay(2000);            // pausa de medio segundo (500 ms)
+    delay(1000);            // pausa de medio segundo (500 ms)
     digitalWrite(D3, HIGH); // desactivamos decimas
-    delay(2000);            // pausa de medio segundo (500 ms)
+    delay(1000);            // pausa de medio segundo (500 ms)
 
     // encender y apagar el dígito de las centecimas
+    tone(37, 3000, 1000);
     digitalWrite(D2, LOW);  // activamos centecimas
-    delay(2000);            // pausa de medio segundo (500 ms)
+    delay(1000);            // pausa de medio segundo (500 ms)
     digitalWrite(D2, HIGH); // desactivamos centecimas
-    delay(2000);            // pausa de medio segundo (500 ms)
+    delay(1000);            // pausa de medio segundo (500 ms)
 
     // encender y apagar el dígito de las milesimas
+    tone(37, 3000, 1000);
     digitalWrite(D1, LOW);  // activamos milesimas
-    delay(2000);            // pausa de medio segundo (500 ms)
+    delay(1000);            // pausa de medio segundo (500 ms)
     digitalWrite(D1, HIGH); // desactivamos milesimas
-    delay(2000);            // pausa de medio segundo (500 ms)
+    delay(1000);            // pausa de medio segundo (500 ms)
 }
