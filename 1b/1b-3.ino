@@ -20,6 +20,7 @@ void motorPos_ini(int freq)
     // Calculamos el valor mas pequeño de n capaz de trabajar con la frequencia pasado para aumentar la precision.
     int n;
     int prescale;
+    // Los valores de frecuencia vienen establecidos por la frecuencia que cada prescalar es capaz de conseguir con PWM
     if (freq < 2)
     {
         prescale = 4; // 256
